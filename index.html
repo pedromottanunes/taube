@@ -1,0 +1,24 @@
+<form id="odForm">
+  <label>Empresa: <input name="company_name" required></label><br>
+  <label>Site: <input name="site_url" required></label><br>
+  <label>Cidade: <input name="city" required></label><br>
+  <label>Objetivo: <input name="objective" required></label><br>
+  <label>Qtd. Carros: <input type="number" name="cars_qtd" min="1" required></label><br>
+  <label>Desconto (R$): <input type="number" name="discount" value="0"></label><br>
+  <label>Logo (URL): <input name="logo_url" required></label><br>
+  <button type="submit">Gerar Orçamento</button>
+</form>
+
+<script>
+document.getElementById('odForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const json = Object.fromEntries(new FormData(e.target));
+  const res = await fetch('https://hook.make.com/SEU-WEBHOOK-ID', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(json)
+  });
+  if (res.ok) alert('Pedido enviado! Você receberá o PDF em instantes.');
+  else alert('Erro ao enviar. Tente novamente.');
+});
+</script>
