@@ -3,28 +3,24 @@
 <!-- =========================================================
      FORMULÁRIO “Gerar Orçamento – OD Drive”
      ---------------------------------------------------------
-     Passo-a-passo ao clicar no botão Gerar Orçamento
-       1. Google OAuth (caso não haja token válido em cache)
-       2. Upload da imagem selecionada para 1 pasta específica
-       3. Envio de TODOS os dados + link da imagem ao webhook
+     • Envia multipart (inputs + arquivo) ao Webhook do Make
+     • O Make recebe mockup_image            (name/type/data)
+     • Cenário salva no Drive, gera slides, etc.
      ========================================================= -->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerar Orçamento • OD Drive</title>
 
-  <!-- Tailwind — utilizado apenas via CDN para fins de protótipo -->
+  <!-- Tailwind CDN (protótipo) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Identity + GAPI (obrigatórios para OAuth 2 + Drive) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js"      async defer></script>
 
   <style>
     :root{ --od-primary:#0f766e; }
     .bg-primary{background-color:var(--od-primary)}
     .focus\:ring-primary:focus{
-      --tw-ring-color:var(--od-primary);--tw-ring-opacity:.6}
+      --tw-ring-color:var(--od-primary);
+      --tw-ring-opacity:.6}
   </style>
 </head>
 
@@ -46,6 +42,7 @@
         <input id="company_name" name="company_name" required
                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-primary">
       </div>
+
       <!-- Site -->
       <div>
         <label class="block text-sm mb-1" for="site_url">Site</label>
@@ -53,18 +50,21 @@
                placeholder="https://exemplo.com"
                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-primary">
       </div>
+
       <!-- Cidade -->
       <div>
         <label class="block text-sm mb-1" for="city">Cidade</label>
         <input id="city" name="city" required
                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-primary">
       </div>
+
       <!-- Objetivo -->
       <div class="sm:col-span-2">
         <label class="block text-sm mb-1" for="objective">Objetivo</label>
         <input id="objective" name="objective" required
                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-primary">
       </div>
+
       <!-- Upload -->
       <div class="sm:col-span-2">
         <label class="block text-sm mb-1" for="mockup_image">
@@ -106,63 +106,46 @@
 
 <!-- ==================================================================== -->
 <script>
-/* ╔═════════════════════ CONSTANTES DE CONFIG  ════════════════════════╗ */
-/*const CLIENT_ID = '206253858878-rdmme43csja9vuicd6uh4so1cgfg3v0u.apps.googleusercontent.com';     // Google OAuth
-/*const API_KEY = 'AIzaSyDSQt5SOwfXOKuMasPUShacyHmsjzObDnA';
-/*const SCOPES = 'https://www.googleapis.com/auth/drive.file';   // acesso pasta
-/*const DRIVE_FOLDERID = '1bIys1gHPhDJvRY-TJg1ClgIMJqON_dEm';                          // ID da pasta
-const WEBHOOK_URL    = 'https://hook.us2.make.com/ssddbgjp5jqdwpdcmmbrx14d2chwmxxa';         // Webhook Make
-/* ╚═══════════════════════════════════════════════════════════════════╝ */
+/* ╔═════════════════════ CONFIGURAÇÃO ════════════════════════╗ */
+const WEBHOOK_URL = 'https://hook.us2.make.com/ssddbgjp5jqdwpdcmmbrx14d2chwmxxa'; //  <<< troque aqui
+/* ╚═══════════════════════════════════════════════════════════╝ */
 
-
- 
 /* --------- Referências DOM --------- */
-const form       = document.getElementById('odForm');
-const msg        = document.getElementById('msg');
-const inputFile  = document.getElementById('mockup_image');
+const form      = document.getElementById('odForm');
+const msg       = document.getElementById('msg');
+const inputFile = document.getElementById('mockup_image');
 
-
-
-
-
-
-     
-
-/* ====================================================================
-   3)  ENVIA OS DADOS (JSON) PARA O WEBHOOK DO MAKE
-   ==================================================================== */
-async function sendPayloadToMake(dataObj){
-  await fetch(WEBHOOK_URL,{
-    method:'POST',
-    headers:{ 'Content-Type':'application/json' },
-    body:JSON.stringify(dataObj)
-  });
+/* --------- Utilitário para mensagens --------- */
+function showMsg(text, ok = true){
+  msg.textContent = text;
+  msg.className   = `text-center text-sm mt-2 ${ ok ? 'text-primary' : 'text-red-600' }`;
+  msg.classList.remove('hidden');
 }
 
-/* ====================================================================
-   LISTENER DE SUBMISSÃO
-   ==================================================================== */
-form.addEventListener('submit', async ev=>{
+/* --------- Envio --------- */
+form.addEventListener('submit', async ev => {
   ev.preventDefault(); msg.classList.add('hidden');
 
+  /* valida imagem */
   const file = inputFile.files[0];
   if(!file || !['image/png','image/jpeg'].includes(file.type)){
-    showMsg('Selecione uma imagem PNG ou JPG', false); return;
+    showMsg('❌ Selecione uma imagem PNG ou JPG', false); return;
   }
 
-  /* ---------- monta multipart ----------- */
-  const fd = new FormData(form);     // já inclui todos os inputs
-  fd.set('mockup_image', file);      // garante o arquivo dentro do mesmo form
+  /* monta multipart */
+  const fd = new FormData(form);        // inclui todos os campos texto/number
+  fd.set('mockup_image', file);         // garante o arquivo no mesmo campo
 
   try{
-    const res = await fetch(WEBHOOK_URL, { method:'POST', body:fd });
-    if(!res.ok) throw new Error('Webhook retornou '+res.status);
-    showMsg('✅ Orçamento enviado!'); form.reset();
+    const res = await fetch(WEBHOOK_URL, { method:'POST', body: fd });
+    if(!res.ok) throw new Error('Webhook '+res.status);
+    showMsg('✅ Orçamento enviado com sucesso!');
+    form.reset();
   }catch(err){
-    console.error(err); showMsg('Erro: '+err.message||err, false);
+    console.error(err);
+    showMsg('Erro ao enviar: '+(err.message || err), false);
   }
 });
-
 </script>
 </body>
 </html>
