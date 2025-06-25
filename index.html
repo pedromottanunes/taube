@@ -107,10 +107,10 @@
 <!-- ==================================================================== -->
 <script>
 /* ╔═════════════════════ CONSTANTES DE CONFIG  ════════════════════════╗ */
-const CLIENT_ID = '206253858878-rdmme43csja9vuicd6uh4so1cgfg3v0u.apps.googleusercontent.com';     // Google OAuth
-const API_KEY = 'AIzaSyDSQt5SOwfXOKuMasPUShacyHmsjzObDnA';
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';   // acesso pasta
-const DRIVE_FOLDERID = '1bIys1gHPhDJvRY-TJg1ClgIMJqON_dEm';                          // ID da pasta
+/*const CLIENT_ID = '206253858878-rdmme43csja9vuicd6uh4so1cgfg3v0u.apps.googleusercontent.com';     // Google OAuth
+/*const API_KEY = 'AIzaSyDSQt5SOwfXOKuMasPUShacyHmsjzObDnA';
+/*const SCOPES = 'https://www.googleapis.com/auth/drive.file';   // acesso pasta
+/*const DRIVE_FOLDERID = '1bIys1gHPhDJvRY-TJg1ClgIMJqON_dEm';                          // ID da pasta
 const WEBHOOK_URL    = 'https://hook.us2.make.com/ssddbgjp5jqdwpdcmmbrx14d2chwmxxa';         // Webhook Make
 /* ╚═══════════════════════════════════════════════════════════════════╝ */
 
@@ -121,73 +121,12 @@ const form       = document.getElementById('odForm');
 const msg        = document.getElementById('msg');
 const inputFile  = document.getElementById('mockup_image');
 
-/* --------- Variáveis de token --------- */
-let accessToken  = '';
-let tokenClient;   // ficará disponível após gapi + Identity
 
-/* ====================================================================
-   UTILIDADES DE MENSAGEM (verde = OK | vermelho = erro)
-   ==================================================================== */
-function showMsg(text, ok=true){
-  msg.textContent = text;
-  msg.className   = `text-center text-sm mt-2 ${ok? 'text-primary':'text-red-600'}`;
-  msg.classList.remove('hidden');
-}
 
-/* ====================================================================
-   1)  AUTENTICAÇÃO  (carrega GAPI → obtém / renova access_token)
-   ==================================================================== */
-function ensureGoogleToken(){
-  return new Promise((resolve,reject)=>{
 
-    /* se já temos token válido em cache, usa direto */
-    const exp = Number(localStorage.getItem('token_exp'))||0;
-    if(accessToken && Date.now() < exp){ return resolve(); }
 
-    /* carrega GAPI + inicia client */
-    gapi.load('client', async ()=>{
-      await gapi.client.init({ apiKey: API_KEY });
 
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID, scope: SCOPES,
-        callback: (resp)=>{
-          if(resp && resp.access_token){
-            accessToken = resp.access_token;
-            const e = Date.now()+((resp.expires_in||3600)-300)*1e3;
-            localStorage.setItem('token_exp', e);
-            resolve();
-          }else{
-            reject('Falha ao obter token');
-          }
-        }
-      });
-
-      tokenClient.requestAccessToken({ prompt:'consent' });
-    });
-  });
-}
-
-/* ====================================================================
-   2)  UPLOAD PARA O DRIVE  (mulitpart/form-data)
-   ==================================================================== */
-async function uploadFileToDrive(file){
-  const metadata = {
-    name: file.name,
-    mimeType: file.type,
-    parents:[DRIVE_FOLDERID]
-  };
-
-  const body = new FormData();
-  body.append('metadata', new Blob([JSON.stringify(metadata)],{type:'application/json'}));
-  body.append('file', file);
-
-  const res = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',
-    { method:'POST', headers:{ Authorization:'Bearer '+accessToken }, body });
-
-  if(!res.ok) throw new Error('Google Drive retornou '+res.status);
-  return res.json();                // { id, webViewLink }
-}
+     
 
 /* ====================================================================
    3)  ENVIA OS DADOS (JSON) PARA O WEBHOOK DO MAKE
@@ -206,32 +145,24 @@ async function sendPayloadToMake(dataObj){
 form.addEventListener('submit', async ev=>{
   ev.preventDefault(); msg.classList.add('hidden');
 
-  /* validação do arquivo */
   const file = inputFile.files[0];
   if(!file || !['image/png','image/jpeg'].includes(file.type)){
     showMsg('Selecione uma imagem PNG ou JPG', false); return;
   }
 
+  /* ---------- monta multipart ----------- */
+  const fd = new FormData(form);     // já inclui todos os inputs
+  fd.set('mockup_image', file);      // garante o arquivo dentro do mesmo form
+
   try{
-    /* 1. OAuth (se preciso) */
-    await ensureGoogleToken();
-
-    /* 2. Upload para Drive */
-    const driveInfo = await uploadFileToDrive(file);
-
-    /* 3. Monta payload e dispara Webhook */
-    const formDataObj = Object.fromEntries(new FormData(form).entries());
-    formDataObj.mockup_drive_link = driveInfo.webViewLink;
-
-    await sendPayloadToMake(formDataObj);
-
-    showMsg('✅ Orçamento enviado com sucesso!'); form.reset();
-
+    const res = await fetch(WEBHOOK_URL, { method:'POST', body:fd });
+    if(!res.ok) throw new Error('Webhook retornou '+res.status);
+    showMsg('✅ Orçamento enviado!'); form.reset();
   }catch(err){
-    console.error(err);
-    showMsg('Erro: '+err.message||err, false);
+    console.error(err); showMsg('Erro: '+err.message||err, false);
   }
 });
+
 </script>
 </body>
 </html>
