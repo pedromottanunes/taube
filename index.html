@@ -7,135 +7,416 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
   <style>
-    :root{ --od-primary:#0f766e; }
-    .bg-primary{background-color:var(--od-primary)}
-    .text-primary{color:var(--od-primary)}
-    .focus\:ring-primary:focus{
-      --tw-ring-color:var(--od-primary);
-      --tw-ring-opacity:.7}
-    /* Custom Scrollbar minimalista */
-    ::-webkit-scrollbar{ width:6px; }
-    ::-webkit-scrollbar-thumb{ background:#e0e0e0; border-radius:3px;}
+    :root {
+      --od-primary: #0f766e;
+      --od-primary-light: #14b8a6;
+      --od-secondary: #0891b2;
+    }
+    
+    .bg-gradient-primary {
+      background: linear-gradient(135deg, var(--od-primary) 0%, var(--od-primary-light) 100%);
+    }
+    
+    .bg-gradient-secondary {
+      background: linear-gradient(135deg, var(--od-secondary) 0%, var(--od-primary-light) 100%);
+    }
+    
+    .border-gradient {
+      border: 2px solid transparent;
+      background: linear-gradient(white, white) padding-box,
+                  linear-gradient(135deg, var(--od-primary), var(--od-primary-light)) border-box;
+    }
+    
+    .input-focus {
+      transition: all 0.3s ease;
+    }
+    
+    .input-focus:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(15, 118, 110, 0.15);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--od-primary) 0%, var(--od-primary-light) 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .card-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .floating-label {
+      transition: all 0.3s ease;
+    }
+    
+    .input-group:focus-within .floating-label {
+      transform: translateY(-8px) scale(0.85);
+      color: var(--od-primary);
+    }
+    
+    .input-group input:not(:placeholder-shown) + .floating-label {
+      transform: translateY(-8px) scale(0.85);
+      color: var(--od-primary);
+    }
+    
+    .upload-area {
+      transition: all 0.3s ease;
+      border: 2px dashed #d1d5db;
+    }
+    
+    .upload-area:hover {
+      border-color: var(--od-primary);
+      background-color: rgba(15, 118, 110, 0.05);
+    }
+    
+    .upload-area.dragover {
+      border-color: var(--od-primary-light);
+      background-color: rgba(20, 184, 166, 0.1);
+      transform: scale(1.02);
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .animate-delay-100 { animation-delay: 0.1s; }
+    .animate-delay-200 { animation-delay: 0.2s; }
+    .animate-delay-300 { animation-delay: 0.3s; }
+    
+    .icon-field {
+      position: relative;
+    }
+    
+    .icon-field .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      transition: color 0.3s ease;
+    }
+    
+    .icon-field input:focus + .icon {
+      color: var(--od-primary);
+    }
+    
+    .icon-field input {
+      padding-left: 40px;
+    }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gradient-to-tr from-gray-100 via-gray-50 to-white px-2">
 
-<section class="w-full max-w-lg bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-7 sm:p-10 border border-gray-100">
-  <!-- HEADER -->
-  <div class="mb-7 flex flex-col items-center">
-    <div class="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 mb-3">
-      <!-- Ícone SVG discreto, moderno -->
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="text-primary">
-        <path d="M8 19h8M12 5v14m0 0c-3.866 0-7-3.134-7-7a7 7 0 0114 0c0 3.866-3.134 7-7 7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 text-center mb-1">
-      Gerar Orçamento
-    </h1>
-    <div class="text-sm text-gray-500 font-medium">OD Drive</div>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50 px-4 py-8">
+  <!-- Background Pattern -->
+  <div class="fixed inset-0 opacity-5">
+    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25% 25%, var(--od-primary) 2px, transparent 2px); background-size: 50px 50px;"></div>
   </div>
 
-  <!-- FORM -->
-  <form id="odForm" class="space-y-6">
-    <!-- DADOS PRINCIPAIS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      <!-- Empresa -->
-      <div class="sm:col-span-2">
-        <label for="company_name" class="block text-xs font-semibold text-gray-700 mb-1">Empresa</label>
-        <input id="company_name" name="company_name" required
-          class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/30 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 transition" />
+  <!-- Main Container -->
+  <div class="relative max-w-2xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8 animate-fade-in-up">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-primary rounded-2xl mb-4 shadow-lg">
+        <i data-lucide="calculator" class="w-8 h-8 text-white"></i>
       </div>
-
-      <!-- Site -->
-      <div>
-        <label for="site_url" class="block text-xs font-semibold text-gray-700 mb-1">Site</label>
-        <input id="site_url" name="site_url" type="url" required
-          placeholder="https://exemplo.com"
-          class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/30 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 transition" />
-      </div>
-
-      <!-- Cidade -->
-      <div>
-        <label for="city" class="block text-xs font-semibold text-gray-700 mb-1">Cidade</label>
-        <input id="city" name="city" required
-          class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/30 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 transition" />
-      </div>
-
-      <!-- Objetivo -->
-      <div class="sm:col-span-2">
-        <label for="objective" class="block text-xs font-semibold text-gray-700 mb-1">Objetivo</label>
-        <input id="objective" name="objective" required
-          class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/30 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-400 transition" />
-      </div>
-
-      <!-- Upload -->
-      <div class="sm:col-span-2">
-        <label for="mockup_image" class="block text-xs font-semibold text-gray-700 mb-1">Imagem / Mockup (PNG ou JPG)</label>
-        <input id="mockup_image" name="mockup_image" type="file"
-          accept="image/png,image/jpeg" required
-          class="block w-full rounded-lg border border-gray-200 bg-white file:bg-primary file:text-white file:rounded file:border-0 file:py-1 file:px-4 file:cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/30 transition" />
-      </div>
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
+        Gerar Orçamento
+      </h1>
+      <p class="text-lg text-gray-600 font-medium">OD Drive</p>
+      <div class="w-24 h-1 bg-gradient-primary rounded-full mx-auto mt-4"></div>
     </div>
 
-    <!-- NÚMEROS -->
-    <div class="grid grid-cols-2 gap-5">
-      <div>
-        <label for="cars_qtd" class="block text-xs font-semibold text-gray-700 mb-1">Qtd. Carros</label>
-        <input id="cars_qtd" name="cars_qtd" type="number" min="1" required
-          class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/30 rounded-lg px-3 py-2 text-gray-900 transition" />
-      </div>
-      <div>
-        <label for="discount" class="block text-xs font-semibold text-gray-700 mb-1">Desconto (R$)</label>
-        <input id="discount" name="discount" type="number" step="0.01" value="0"
-          class="w-full bg-gray-50 border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/30 rounded-lg px-3 py-2 text-gray-900 transition" />
-      </div>
+    <!-- Form Container -->
+    <div class="card-container rounded-3xl shadow-2xl p-8 animate-fade-in-up animate-delay-100">
+      <form id="odForm" class="space-y-8">
+        
+        <!-- Company Information Section -->
+        <div class="space-y-6">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <i data-lucide="building-2" class="w-5 h-5 text-teal-600"></i>
+            Informações da Empresa
+          </h2>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Company Name -->
+            <div class="lg:col-span-2 icon-field">
+              <input 
+                id="company_name" 
+                name="company_name" 
+                required
+                placeholder="Nome da empresa"
+                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 font-medium"
+              >
+              <i data-lucide="building" class="icon w-5 h-5"></i>
+            </div>
+
+            <!-- Website -->
+            <div class="icon-field">
+              <input 
+                id="site_url" 
+                name="site_url" 
+                type="url" 
+                required
+                placeholder="https://exemplo.com"
+                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
+              >
+              <i data-lucide="globe" class="icon w-5 h-5"></i>
+            </div>
+
+            <!-- City -->
+            <div class="icon-field">
+              <input 
+                id="city" 
+                name="city" 
+                required
+                placeholder="Cidade"
+                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
+              >
+              <i data-lucide="map-pin" class="icon w-5 h-5"></i>
+            </div>
+
+            <!-- Objective -->
+            <div class="lg:col-span-2 icon-field">
+              <input 
+                id="objective" 
+                name="objective" 
+                required
+                placeholder="Objetivo do projeto"
+                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
+              >
+              <i data-lucide="target" class="icon w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Details Section -->
+        <div class="space-y-6">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <i data-lucide="settings" class="w-5 h-5 text-teal-600"></i>
+            Detalhes do Projeto
+          </h2>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Cars Quantity -->
+            <div class="icon-field">
+              <input 
+                id="cars_qtd" 
+                name="cars_qtd" 
+                type="number" 
+                min="1" 
+                required
+                placeholder="Quantidade de carros"
+                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
+              >
+              <i data-lucide="car" class="icon w-5 h-5"></i>
+            </div>
+
+            <!-- Discount -->
+            <div class="icon-field">
+              <input 
+                id="discount" 
+                name="discount" 
+                type="number" 
+                step="0.01" 
+                value="0"
+                placeholder="Desconto (R$)"
+                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
+              >
+              <i data-lucide="percent" class="icon w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="space-y-6">
+          <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <i data-lucide="upload" class="w-5 h-5 text-teal-600"></i>
+            Imagem / Mockup
+          </h2>
+          
+          <div class="upload-area rounded-xl p-8 text-center cursor-pointer" id="uploadArea">
+            <input 
+              id="mockup_image" 
+              name="mockup_image" 
+              type="file"
+              accept="image/png,image/jpeg" 
+              required
+              class="hidden"
+            >
+            <div class="upload-content">
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                <i data-lucide="image" class="w-8 h-8 text-gray-400"></i>
+              </div>
+              <p class="text-lg font-medium text-gray-700 mb-2">Clique para enviar ou arraste aqui</p>
+              <p class="text-sm text-gray-500">PNG ou JPG até 10MB</p>
+            </div>
+            <div class="file-preview hidden">
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+              </div>
+              <p class="text-lg font-medium text-green-700 mb-2">Arquivo selecionado</p>
+              <p class="text-sm text-gray-600 file-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          class="w-full h-16 btn-primary text-white font-bold text-lg rounded-xl shadow-lg flex items-center justify-center gap-3"
+        >
+          <i data-lucide="send" class="w-6 h-6"></i>
+          Gerar Orçamento
+        </button>
+
+        <!-- Status Message -->
+        <div id="msg" class="text-center text-sm mt-4 hidden"></div>
+      </form>
     </div>
 
-    <!-- BOTÃO -->
-    <button type="submit"
-      class="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm tracking-tight text-base">
-      Gerar Orçamento
-    </button>
+    <!-- Footer -->
+    <div class="text-center mt-8 text-gray-500 text-sm animate-fade-in-up animate-delay-300">
+      <p>© 2024 OD Drive. Todos os direitos reservados.</p>
+    </div>
+  </div>
 
-    <!-- Mensagem dinâmica -->
-    <p id="msg" class="text-center text-sm mt-2 hidden"></p>
-  </form>
-</section>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
 
-<script>
-// ... Seu JS permanece igual ...
-const WEBHOOK_URL = 'https://hook.us2.make.com/ssddbgjp5jqdwpdcmmbrx14d2chwmxxa';
-const form      = document.getElementById('odForm');
-const msg       = document.getElementById('msg');
-const inputFile = document.getElementById('mockup_image');
+    // Configuration
+    const WEBHOOK_URL = 'https://hook.us2.make.com/ssddbgjp5jqdwpdcmmbrx14d2chwmxxa';
 
-function showMsg(text, ok = true){
-  msg.textContent = text;
-  msg.className   = `text-center text-sm mt-2 ${ ok ? 'text-primary' : 'text-red-600' }`;
-  msg.classList.remove('hidden');
-}
+    // DOM References
+    const form = document.getElementById('odForm');
+    const msg = document.getElementById('msg');
+    const inputFile = document.getElementById('mockup_image');
+    const uploadArea = document.getElementById('uploadArea');
+    const uploadContent = uploadArea.querySelector('.upload-content');
+    const filePreview = uploadArea.querySelector('.file-preview');
+    const fileName = uploadArea.querySelector('.file-name');
 
-form.addEventListener('submit', async ev => {
-  ev.preventDefault(); msg.classList.add('hidden');
-  const file = inputFile.files[0];
-  if(!file || !['image/png','image/jpeg'].includes(file.type)){
-    showMsg('❌ Selecione uma imagem PNG ou JPG', false); return;
-  }
-  const fd = new FormData(form);
-  fd.set('mockup_image', file);
+    // Utility function for messages
+    function showMsg(text, ok = true) {
+      msg.textContent = text;
+      msg.className = `text-center text-sm mt-4 ${ok ? 'text-teal-600' : 'text-red-600'}`;
+      msg.classList.remove('hidden');
+    }
 
-  try{
-    const res = await fetch(WEBHOOK_URL, { method:'POST', body: fd });
-    if(!res.ok) throw new Error('Webhook '+res.status);
-    showMsg('✅ Orçamento enviado com sucesso!');
-    form.reset();
-  }catch(err){
-    console.error(err);
-    showMsg('Erro ao enviar: '+(err.message || err), false);
-  }
-});
-</script>
+    // File upload handling
+    uploadArea.addEventListener('click', () => inputFile.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        inputFile.files = files;
+        updateFilePreview(files[0]);
+      }
+    });
+
+    inputFile.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        updateFilePreview(e.target.files[0]);
+      }
+    });
+
+    function updateFilePreview(file) {
+      if (file && ['image/png', 'image/jpeg'].includes(file.type)) {
+        uploadContent.classList.add('hidden');
+        filePreview.classList.remove('hidden');
+        fileName.textContent = file.name;
+      }
+    }
+
+    // Form submission
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      msg.classList.add('hidden');
+
+      // Validate image
+      const file = inputFile.files[0];
+      if (!file || !['image/png', 'image/jpeg'].includes(file.type)) {
+        showMsg('❌ Selecione uma imagem PNG ou JPG', false);
+        return;
+      }
+
+      // Show loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Enviando...';
+      submitBtn.disabled = true;
+      lucide.createIcons();
+
+      try {
+        const fd = new FormData(form);
+        fd.set('mockup_image', file);
+
+        const res = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('Webhook ' + res.status);
+        
+        showMsg('✅ Orçamento enviado com sucesso!');
+        form.reset();
+        uploadContent.classList.remove('hidden');
+        filePreview.classList.add('hidden');
+      } catch (err) {
+        console.error(err);
+        showMsg('Erro ao enviar: ' + (err.message || err), false);
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        lucide.createIcons();
+      }
+    });
+
+    // Input animations
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', () => {
+        input.parentElement.classList.add('focused');
+      });
+      
+      input.addEventListener('blur', () => {
+        input.parentElement.classList.remove('focused');
+      });
+    });
+  </script>
 </body>
 </html>
+
