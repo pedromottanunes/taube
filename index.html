@@ -206,20 +206,22 @@
               <i data-lucide="map-pin" class="icon w-5 h-5"></i>
             </div>
 
-          <!-- Seleção de Produtos -->
-          <h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2 mt-2"><i data-lucide="shopping-bag" class="w-5 h-5 text-teal-600"></i>Seleção de Produtos</h3>
-          <div id="product_wrapper" class="space-y-4">
-            <select id="product_1" name="product[]" required class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800">
-              <option value="" disabled selected>Selecione um produto</option>
-              <option value="OD_VT">01 · OD VT</option>
-              <option value="OD_DROP">02 · OD DROP</option>
-              <option value="OD_PACK">03 · OD PACK</option>
-              <option value="OD_FULL">04 · OD FULL</option>
-              <option value="OD_LIGHT">05 · OD LIGHT</option>
-            </select>
-          </div>
-          <button type="button" id="addProduct" class="flex items-center gap-2 text-teal-700 font-medium hover:text-teal-900 transition"><i data-lucide="plus-circle" class="w-5 h-5"></i>Adicionar outro produto</button>
-        </div>
+<!-- Seleção de Produtos -->
+<h3 class="text-lg font-semibold text-gray-700 flex items-center gap-2 mt-2">
+  <i data-lucide="shopping-bag" class="w-5 h-5 text-teal-600"></i>Seleção de Produtos
+</h3>
+
+<div id="product_wrapper" class="space-y-4">
+  <!-- Os selects serão gerados via JS aqui dentro -->
+</div>
+
+<div class="flex gap-4">
+  <button type="button" id="addProduct"
+          class="flex items-center gap-2 text-teal-700 font-medium hover:text-teal-900 transition">
+    <i data-lucide="plus-circle" class="w-5 h-5"></i>Adicionar produto
+  </button>
+</div>
+
 
 
         <!-- Project Details Section -->
@@ -316,6 +318,65 @@
   <script>
     // Initialize Lucide icons
     lucide.createIcons();
+
+    /* === Produtos dinâmicos (add & remove) =================== */
+const productWrapper = document.getElementById('product_wrapper');
+const addProductBtn  = document.getElementById('addProduct');
+let productCount = 0;
+
+/* Gera um <div> contendo <select> + botão “×” -------------- */
+function createProductSelect() {
+  productCount++;
+
+  const container = document.createElement('div');
+  container.className = 'flex gap-2 items-center';
+  container.dataset.pid = productCount;           // id interno
+
+  // dropdown
+  const select = document.createElement('select');
+  select.name     = 'product[]';
+  select.required = true;
+  select.className =
+    'flex-1 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800';
+  select.innerHTML = `
+    <option value="" disabled selected>Selecione um produto</option>
+    <option value="OD_VT">01 · OD VT</option>
+    <option value="OD_DROP">02 · OD DROP</option>
+    <option value="OD_PACK">03 · OD PACK</option>
+    <option value="OD_FULL">04 · OD FULL</option>
+    <option value="OD_LIGHT">05 · OD LIGHT</option>
+  `;
+
+  // botão remover
+  const removeBtn = document.createElement('button');
+  removeBtn.type  = 'button';
+  removeBtn.className = 'removeProduct text-red-600 hover:text-red-800 transition';
+  removeBtn.innerHTML = '<i data-lucide="x-circle" class="w-5 h-5"></i>';
+
+  container.appendChild(select);
+  container.appendChild(removeBtn);
+  return container;
+}
+
+/* 1º select já aparece na tela -------------------------------- */
+productWrapper.appendChild(createProductSelect());
+lucide.createIcons();  // redesenha ícones
+
+/* + Adicionar outro produto ----------------------------------- */
+addProductBtn.addEventListener('click', () => {
+  productWrapper.appendChild(createProductSelect());
+  lucide.createIcons();  // redesenha ícones a cada novo bloco
+});
+
+/* Remover produto (delegação de eventos) ---------------------- */
+productWrapper.addEventListener('click', e => {
+  if (e.target.closest('.removeProduct')) {
+    const box = e.target.closest('[data-pid]');
+    box.remove();
+  }
+});
+/* ============================================================ */
+
 
     // Configuration
     const WEBHOOK_URL = 'https://hook.us2.make.com/ssddbgjp5jqdwpdcmmbrx14d2chwmxxa';
