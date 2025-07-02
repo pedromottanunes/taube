@@ -262,35 +262,23 @@
           </div>
         </div>
 
-          <!-- Preço Unitário -->
-          <div class="icon-field">
-            <input
-              id="unit_price"
-              name="unit_price"
-              type="number"
-              step="0.01"
-              required
-              placeholder="Preço unitário (R$)"
-              class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
-            >
-            <i data-lucide="dollar-sign" class="icon w-5 h-5"></i>
-          </div>
-          
-          <!-- Dias de Campanha -->
-          <div class="icon-field">
-            <input
-              id="campaign_days"
-              name="campaign_days"
-              type="number"
-              min="1"
-              required
-              placeholder="Dias de campanha"
-              class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
-            >
-            <i data-lucide="calendar" class="icon w-5 h-5"></i>
-          </div>
 
-         
+          <!-- Dias de campanha -->
+<div class="icon-field">
+  <input 
+    id="campaign_days"
+    name="campaign_days"
+    type="number"
+    min="1"
+    required
+    placeholder="Dias de campanha"
+    class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
+  >
+  <i data-lucide="calendar-days" class="icon w-5 h-5"></i>
+</div>
+
+
+                 
 
         <!-- File Upload Section -->
         <div class="space-y-6">
@@ -372,21 +360,36 @@ function createProductSelect(id, showRemove = true) {
   wrapper.className = "flex items-center gap-2 product-item";
 
   // select
-  const select = document.createElement('select');
-  select.id = 'product_' + id;
-  select.name = 'product[]';
-  select.required = true;
-  select.className = 'w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800';
-  select.innerHTML = `
-    <option value="" disabled selected>Selecione um produto</option>
-    <option value="OD_VT">1 - OD VT</option>
-    <option value="OD_DROP">2 - OD DROP</option>
-    <option value="OD_PACK">3 - OD PACK</option>
-    <option value="OD_FULL">4 - OD FULL</option>
-    <option value="OD_LIGHT">5 - OD LIGHT</option>
-  `;
+// select do produto
+const select = document.createElement('select');
+select.id = 'product_' + id;
+select.name = 'product[]';
+select.required = true;
+select.className = 'w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800';
+select.innerHTML = `
+  <option value="" disabled selected>Selecione um produto</option>
+  <option value="OD_VT">1 - OD VT</option>
+  <option value="OD_DROP">2 - OD DROP</option>
+  <option value="OD_PACK">3 - OD PACK</option>
+  <option value="OD_FULL">4 - OD FULL</option>
+  <option value="OD_LIGHT">5 - OD LIGHT</option>
+`;
 
-  wrapper.appendChild(select);
+// campo de preço unitário
+const inputPrice = document.createElement('input');
+inputPrice.type = 'number';
+inputPrice.step = '0.01';
+inputPrice.min = '0';
+inputPrice.placeholder = 'Preço unitário';
+inputPrice.required = true;
+inputPrice.className = 'w-36 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+
+// Nome dinâmico para fácil captura no envio
+inputPrice.name = 'unit_price[]';
+
+wrapper.appendChild(select);
+wrapper.appendChild(inputPrice);
+
 
   // botão remover (apenas se showRemove for true)
   if (showRemove) {
@@ -485,11 +488,40 @@ addProductBtn.onclick = () => {
       lucide.createIcons();
 
       try {
-        const fd = new FormData(form);
-        fd.set('mockup_image', file);
+            const fd = new FormData();
+            fd.set('company_name', form.company_name.value);
+            fd.set('site_url', form.site_url.value);
+            fd.set('city', form.city.value);
+            fd.set('cars_qtd', form.cars_qtd.value);
+            fd.set('discount', form.discount.value);
+            fd.set('campaign_days', form.campaign_days?.value || '');
+            fd.set('mockup_image', file);
+            
+            // Coletar todos os produtos e seus preços unitários:
+            const productSelects = productWrapper.querySelectorAll('select[name="product[]"]');
+            const priceInputs = productWrapper.querySelectorAll('input[name="unit_price[]"]');
+            const productsArr = [];
+            
+            productSelects.forEach((select, idx) => {
+              const produto = select.value;
+              const preco = priceInputs[idx].value;
+              if (produto && preco) {
+                productsArr.push({ produto, preco });
+              }
+            });
+            
+            // Enviar como JSON string (no Make você acessa como texto e depois separa, ou pode separar no Make usando Parse JSON)
+            fd.set('products', JSON.stringify(productsArr));
+            
+            const res = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });
 
-        const res = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });
+
+
+
+
+        
         if (!res.ok) throw new Error('Webhook ' + res.status);
+      
         
         showMsg('✅ Orçamento enviado com sucesso!');
         form.reset();
