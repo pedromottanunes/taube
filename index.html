@@ -327,6 +327,41 @@
     const filePreview = uploadArea.querySelector('.file-preview');
     const fileName = uploadArea.querySelector('.file-name');
 
+
+/* Produtos dinâmicos */
+const productWrapper = document.getElementById('product_wrapper');
+const addProductBtn  = document.getElementById('addProduct');
+let productCount = 1;
+
+addProductBtn.addEventListener('click', () => {
+  productCount++;
+  
+  // cria novo <select>
+  const select = document.createElement('select');
+  select.id = 'product_' + productCount;
+  select.name = 'product[]';
+  select.required = true;
+  select.className =
+    'w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800';
+  select.innerHTML = `
+    <option value="" disabled selected>Selecione um produto</option>
+    <option value="OD_VT">02 · OD VT</option>
+    <option value="OD_DROP">03 · OD DROP</option>
+    <option value="OD_PACK">04 · OD PACK</option>
+    <option value="OD_FULL">05 · OD FULL</option>
+    <option value="OD_LIGHT">06 · OD LIGHT</option>
+  `;
+  
+  // insere no wrapper
+  productWrapper.appendChild(select);
+});
+
+
+
+
+
+    
+
     // Utility function for messages
     function showMsg(text, ok = true) {
       msg.textContent = text;
