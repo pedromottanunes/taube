@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerar Orçamento • OD Drive</title>
+  <title>Gerar Campanha • OD Drive</title>
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -319,7 +319,7 @@
           class="w-full h-16 btn-primary text-white font-bold text-lg rounded-xl shadow-lg flex items-center justify-center gap-3"
         >
           <i data-lucide="send" class="w-6 h-6"></i>
-          Gerar Orçamento
+          Gerar Campanha
         </button>
 
         <!-- Status Message -->
@@ -523,7 +523,7 @@ addProductBtn.onclick = () => {
         if (!res.ok) throw new Error('Webhook ' + res.status);
       
         
-        showMsg('✅ Orçamento enviado com sucesso!');
+        showMsg('✅ Dados enviados com sucesso!');
         form.reset();
         uploadContent.classList.remove('hidden');
         filePreview.classList.add('hidden');
