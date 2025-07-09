@@ -232,35 +232,9 @@
           </h2>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <!-- Cars Quantity -->
-            <div class="icon-field">
-              <input 
-                id="cars_qtd" 
-                name="cars_qtd" 
-                type="number" 
-                min="1" 
-                required
-                placeholder="Quantidade de carros"
-                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
-              >
-              <i data-lucide="car" class="icon w-5 h-5"></i>
-            </div>
 
-            <!-- Discount -->
-            <div class="icon-field">
-              <input 
-                id="discount" 
-                name="discount" 
-                type="number" 
-                step="0.01" 
-                value="0"
-                placeholder="Desconto (R$)"
-                class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800"
-              >
-              <i data-lucide="percent" class="icon w-5 h-5"></i>
-            </div>
-          </div>
-        </div>
+            
+           
 
 
           <!-- Dias de campanha -->
@@ -376,20 +350,40 @@ select.innerHTML = `
 `;
 
 // campo de preço unitário
-const inputPrice = document.createElement('input');
-inputPrice.type = 'number';
-inputPrice.step = '0.01';
-inputPrice.min = '0';
-inputPrice.placeholder = 'Preço unitário';
-inputPrice.required = true;
-inputPrice.className = 'w-36 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  const inputPrice = document.createElement('input');
+  inputPrice.type = 'number';
+  inputPrice.step = '0.01';
+  inputPrice.min = '0';
+  inputPrice.placeholder = 'Preço unitário (R$)';
+  inputPrice.required = true;
+  inputPrice.className = 'w-36 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  inputPrice.name = 'unit_price[]';
 
-// Nome dinâmico para fácil captura no envio
-inputPrice.name = 'unit_price[]';
+  // campo de quantidade de carros
+  const inputQtd = document.createElement('input');
+  inputQtd.type = 'number';
+  inputQtd.min = '1';
+  inputQtd.placeholder = 'Qtd carros';
+  inputQtd.required = true;
+  inputQtd.className = 'w-32 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  inputQtd.name = 'cars_qtd[]';
 
-wrapper.appendChild(select);
-wrapper.appendChild(inputPrice);
+  // campo de desconto para o produto
+  const inputDiscount = document.createElement('input');
+  inputDiscount.type = 'number';
+  inputDiscount.step = '0.01';
+  inputDiscount.min = '0';
+  inputDiscount.value = '0';
+  inputDiscount.placeholder = 'Desconto (R$)';
+  inputDiscount.required = true;
+  inputDiscount.className = 'w-32 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  inputDiscount.name = 'discount[]';
 
+  // Adiciona os campos ao wrapper
+  wrapper.appendChild(select);
+  wrapper.appendChild(inputPrice);
+  wrapper.appendChild(inputQtd);
+  wrapper.appendChild(inputDiscount);
 
   // botão remover (apenas se showRemove for true)
   if (showRemove) {
@@ -405,7 +399,6 @@ wrapper.appendChild(inputPrice);
 
   return wrapper;
 }
-
 // Inicial (primeiro produto, sem botão remover)
 productWrapper.innerHTML = '';
 productWrapper.appendChild(createProductSelect(1, false));
@@ -492,23 +485,32 @@ addProductBtn.onclick = () => {
             fd.set('company_name', form.company_name.value);
             fd.set('site_url', form.site_url.value);
             fd.set('city', form.city.value);
-            fd.set('cars_qtd', form.cars_qtd.value);
-            fd.set('discount', form.discount.value);
+            fd.set('products', JSON.stringify(productsArr));
             fd.set('campaign_days', form.campaign_days?.value || '');
             fd.set('mockup_image', file);
             
             // Coletar todos os produtos e seus preços unitários:
             const productSelects = productWrapper.querySelectorAll('select[name="product[]"]');
-            const priceInputs = productWrapper.querySelectorAll('input[name="unit_price[]"]');
-            const productsArr = [];
+            const priceInputs    = productWrapper.querySelectorAll('input[name="unit_price[]"]');
+            const qtdInputs      = productWrapper.querySelectorAll('input[name="cars_qtd[]"]');
+            const discountInputs = productWrapper.querySelectorAll('input[name="discount[]"]');
+            const productsArr    = [];
             
             productSelects.forEach((select, idx) => {
               const produto = select.value;
-              const preco = priceInputs[idx].value;
-              if (produto && preco) {
-                productsArr.push({ produto, preco });
+              const preco   = priceInputs[idx].value;
+              const qtd     = qtdInputs[idx].value;
+              const desconto = discountInputs[idx].value;
+              if (produto && preco && qtd && desconto !== undefined) {
+                productsArr.push({
+                  produto,
+                  preco,
+                  qtd,
+                  desconto
+                });
               }
             });
+
             
             // Enviar como JSON string (no Make você acessa como texto e depois separa, ou pode separar no Make usando Parse JSON)
             fd.set('products', JSON.stringify(productsArr));
