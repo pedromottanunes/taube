@@ -206,24 +206,24 @@
               <i data-lucide="map-pin" class="icon w-5 h-5"></i>
             </div>
 
-           Seleção de Produtos
-            </h3>
-          <div id="product_wrapper" class="space-y-4">
-            <div class="flex items-center gap-2 product-item">
-              <select id="product_1" name="product[]" required class="w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800">
-                <option value="" disabled selected>Selecione um produto</option>
-                <option value="OD_VT">02 · OD VT</option>
-                <option value="OD_DROP">03 · OD DROP</option>
-                <option value="OD_PACK">04 · OD PACK</option>
-                <option value="OD_FULL">05 · OD FULL</option>
-                <option value="OD_LIGHT">06 · OD LIGHT</option>
-              </select>
-              <!-- Botão de remover só aparece a partir do segundo -->
-            </div>
-          </div>
+          <!-- Título dos produtos -->
+<h2 class="text-lg font-bold text-gray-700 mt-4 mb-2 flex items-center gap-2">
+  <i data-lucide="package" class="w-5 h-5 text-teal-600"></i>
+  Produtos da Campanha
+</h2>
 
-          <button type="button" id="addProduct" class="flex items-center gap-2 text-teal-700 font-medium hover:text-teal-900 transition"><i data-lucide="plus-circle" class="w-5 h-5"></i>Adicionar outro produto</button>
-        </div>
+<!-- Cards de produtos -->
+<div id="product_wrapper" class="space-y-4"></div>
+
+<!-- Botão adicionar produto -->
+<button type="button" id="addProduct" class="flex items-center gap-2 text-teal-700 font-medium hover:text-teal-900 transition mt-2">
+  <i data-lucide="plus-circle" class="w-5 h-5"></i>
+  Adicionar outro produto
+</button>
+
+
+
+          
         <!-- Project Details Section -->
         <div class="space-y-6">
           <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
@@ -288,13 +288,14 @@
         </div>
 
         <!-- Submit Button -->
-        <button 
-          type="submit"
-          class="w-full h-16 btn-primary text-white font-bold text-lg rounded-xl shadow-lg flex items-center justify-center gap-3"
-        >
-          <i data-lucide="send" class="w-6 h-6"></i>
-          Gerar Campanha
-        </button>
+       <button 
+  type="submit"
+  class="w-full h-16 mt-4 btn-primary text-white font-bold text-lg rounded-xl shadow-lg flex items-center justify-center gap-3"
+>
+  <i data-lucide="send" class="w-6 h-6"></i>
+  Gerar Campanha
+</button>
+
 
         <!-- Status Message -->
         <div id="msg" class="text-center text-sm mt-4 hidden"></div>
@@ -331,66 +332,100 @@ let productCount = 1;
 
 function createProductSelect(id, showRemove = true) {
   const wrapper = document.createElement('div');
-  wrapper.className = "flex items-center gap-2 product-item";
+  wrapper.className = "rounded-xl bg-slate-50 border border-gray-200 p-4 mb-2 flex flex-col gap-2 shadow-sm relative product-item";
 
-  // select
-// select do produto
-const select = document.createElement('select');
-select.id = 'product_' + id;
-select.name = 'product[]';
-select.required = true;
-select.className = 'w-full h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800';
-select.innerHTML = `
-  <option value="" disabled selected>Selecione um produto</option>
-  <option value="OD_VT">1 - OD VT</option>
-  <option value="OD_DROP">2 - OD DROP</option>
-  <option value="OD_PACK">3 - OD PACK</option>
-  <option value="OD_FULL">4 - OD FULL</option>
-  <option value="OD_LIGHT">5 - OD LIGHT</option>
-`;
+  // Grid de inputs do produto
+  const row = document.createElement('div');
+  row.className = "grid grid-cols-1 md:grid-cols-4 gap-3 items-end";
 
-// campo de preço unitário
+  // --- Campo: Produto (select) ---
+  const prodField = document.createElement('div');
+  prodField.className = "flex flex-col";
+  const prodLabel = document.createElement('label');
+  prodLabel.textContent = "Produto";
+  prodLabel.className = "text-xs text-gray-600 mb-1";
+  const select = document.createElement('select');
+  select.id = 'product_' + id;
+  select.name = 'product[]';
+  select.required = true;
+  select.className = 'h-12 rounded-lg border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800 px-3';
+  select.innerHTML = `
+    <option value="" disabled selected>Selecione</option>
+    <option value="OD_VT">OD VT</option>
+    <option value="OD_DROP">OD DROP</option>
+    <option value="OD_PACK">OD PACK</option>
+    <option value="OD_FULL">OD FULL</option>
+    <option value="OD_LIGHT">OD LIGHT</option>
+  `;
+  prodField.appendChild(prodLabel);
+  prodField.appendChild(select);
+
+  // --- Campo: Preço Unitário ---
+  const priceField = document.createElement('div');
+  priceField.className = "flex flex-col";
+  const priceLabel = document.createElement('label');
+  priceLabel.textContent = "Preço unitário (R$)";
+  priceLabel.className = "text-xs text-gray-600 mb-1";
   const inputPrice = document.createElement('input');
   inputPrice.type = 'number';
   inputPrice.step = '0.01';
   inputPrice.min = '0';
-  inputPrice.placeholder = 'Preço unitário (R$)';
+  inputPrice.placeholder = 'Preço';
   inputPrice.required = true;
-  inputPrice.className = 'w-36 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  inputPrice.className = 'h-12 rounded-lg border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800 px-3';
   inputPrice.name = 'unit_price[]';
+  priceField.appendChild(priceLabel);
+  priceField.appendChild(inputPrice);
 
-  // campo de quantidade de carros
+  // --- Campo: Qtd carros ---
+  const qtdField = document.createElement('div');
+  qtdField.className = "flex flex-col";
+  const qtdLabel = document.createElement('label');
+  qtdLabel.textContent = "Qtd carros";
+  qtdLabel.className = "text-xs text-gray-600 mb-1";
   const inputQtd = document.createElement('input');
   inputQtd.type = 'number';
   inputQtd.min = '1';
-  inputQtd.placeholder = 'Qtd carros';
+  inputQtd.placeholder = 'Qtd';
   inputQtd.required = true;
-  inputQtd.className = 'w-32 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  inputQtd.className = 'h-12 rounded-lg border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800 px-3';
   inputQtd.name = 'cars_qtd[]';
+  qtdField.appendChild(qtdLabel);
+  qtdField.appendChild(inputQtd);
 
-  // campo de desconto para o produto
+  // --- Campo: Desconto ---
+  const discountField = document.createElement('div');
+  discountField.className = "flex flex-col";
+  const discountLabel = document.createElement('label');
+  discountLabel.textContent = "Desconto (R$)";
+  discountLabel.className = "text-xs text-gray-600 mb-1";
   const inputDiscount = document.createElement('input');
   inputDiscount.type = 'number';
   inputDiscount.step = '0.01';
   inputDiscount.min = '0';
   inputDiscount.value = '0';
-  inputDiscount.placeholder = 'Desconto (R$)';
+  inputDiscount.placeholder = 'Desconto';
   inputDiscount.required = true;
-  inputDiscount.className = 'w-32 h-14 rounded-xl border-2 border-gray-200 input-focus focus:border-teal-500 focus:ring-0 text-gray-800 px-3';
+  inputDiscount.className = 'h-12 rounded-lg border-2 border-gray-200 input-focus focus:border-teal-500 text-gray-800 px-3';
   inputDiscount.name = 'discount[]';
+  discountField.appendChild(discountLabel);
+  discountField.appendChild(inputDiscount);
 
-  // Adiciona os campos ao wrapper
-  wrapper.appendChild(select);
-  wrapper.appendChild(inputPrice);
-  wrapper.appendChild(inputQtd);
-  wrapper.appendChild(inputDiscount);
+  // Adiciona todos na linha
+  row.appendChild(prodField);
+  row.appendChild(priceField);
+  row.appendChild(qtdField);
+  row.appendChild(discountField);
 
-  // botão remover (apenas se showRemove for true)
+  wrapper.appendChild(row);
+
+  // Botão remover (só para >1 produto)
   if (showRemove) {
     const removeBtn = document.createElement('button');
     removeBtn.type = "button";
+    removeBtn.title = "Remover produto";
     removeBtn.innerHTML = '<i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>';
-    removeBtn.className = "ml-2 p-1";
+    removeBtn.className = "absolute top-2 right-2 p-1 bg-white rounded-full shadow-sm hover:bg-red-50";
     removeBtn.onclick = () => {
       wrapper.remove();
     };
@@ -399,6 +434,7 @@ select.innerHTML = `
 
   return wrapper;
 }
+
 // Inicial (primeiro produto, sem botão remover)
 productWrapper.innerHTML = '';
 productWrapper.appendChild(createProductSelect(1, false));
