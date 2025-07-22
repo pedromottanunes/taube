@@ -9,6 +9,7 @@ const CONFIG = {
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
   ALLOWED_FILE_TYPES: ['image/png', 'image/jpeg'],
   PRODUCT_OPTIONS: [
+    { value: 'OD_IN', label: 'OD IN' },
     { value: 'OD_VT', label: 'OD VT' },
     { value: 'OD_DROP', label: 'OD DROP' },
     { value: 'OD_PACK', label: 'OD PACK' },
